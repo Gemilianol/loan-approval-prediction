@@ -2,10 +2,12 @@ import * as React from 'react';
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
 import './App.css';
+import Input from './components/Input';
 
 function App() {
   return (
   <div>
+    <Input />
       <Button variant="contained" color="success" size="small" endIcon={<SendIcon />}>
         Send
       </Button>
