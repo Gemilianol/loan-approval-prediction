@@ -9,4 +9,5 @@ notebook
 jupyter-client
 jupyter-core
 scikit-learn
+xgboost
 
