@@ -7,7 +7,9 @@ import Input from './components/Input';
 function App() {
   return (
   <div>
-    <Input />
+    <Input value='409'/>
+    <Input value='419'/>
+    <Input value='429'/>
       <Button variant="contained" color="success" size="small" endIcon={<SendIcon />}>
         Send
       </Button>

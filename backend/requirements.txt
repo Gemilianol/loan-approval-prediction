@@ -10,4 +10,5 @@ jupyter-client
 jupyter-core
 scikit-learn
 xgboost
+pydantic
 

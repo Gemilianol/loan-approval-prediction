@@ -1,0 +1,9 @@
+'''
+REAL CONFIGURATION LIKE A PRODUCTION READY ENVIRONMENT.
+'''
+
+DATA_PATH = 'data/raw_data.csv'
+MODEL_PATH = ""
+DATA_SOURCES = {
+    'key': 'value'
+}
