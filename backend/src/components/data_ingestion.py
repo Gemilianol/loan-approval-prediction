@@ -1,7 +1,7 @@
 import pandas as pd
 from src.config import DATA_PATH
 from src.utils.logger import logger
-from pydantic import validate_call, ValidationError
+from pydantic import validate_call
 
 @validate_call
 def load_data(file_path: str) -> pd.DataFrame:
@@ -16,11 +16,6 @@ def load_data(file_path: str) -> pd.DataFrame:
     try:
         data = pd.read_csv(file_path)
         return data
-    
-    # Irrelevant because will raise before try bock
-    # except ValidationError as e:
-    #     logger.debug('Error validating the file path => %s', e)
-    #     raise ValidationError(f'Error validating the file path => {e}') from e
         
     except FileNotFoundError as e:
         logger.debug('Error loading the CSV file %s', e)
@@ -31,9 +26,12 @@ def load_data(file_path: str) -> pd.DataFrame:
         logger.debug('Error loading the CSV file =>%s', e)
         raise RuntimeError(f'Error loading the CSV file => {e}') from e
 
-if __name__ == '__main__':
-    df = load_data(DATA_PATH)
-    print(df.head(5))
+## If you want to try the function isolated of the project, then
+## uncomment this snippet:
+ 
+# if __name__ == '__main__':
+#     df = load_data(DATA_PATH)
+#     print(df.head(5))
 
-# Run the script using the -m flag, treating the src folder as a package:  
+# And run the script using the -m flag, treating the src folder as a package from backend:  
 # python -m src.components.data_ingestion
