@@ -224,8 +224,11 @@ __marimo__/
 # Logs
 */logs
 
-#Models
+# Models
 */models
+
+# MlFlow
+*/mlruns
 
 # Node & React
 frontend/node_modules/

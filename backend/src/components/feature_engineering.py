@@ -60,10 +60,16 @@ def feature_engineering(data: pd.DataFrame) -> pd.DataFrame:
     except Exception as e:
         logger.debug('Error cleaning the Dataset passed =>%s', e)
         raise RuntimeError(f'Error cleaning the Dataset passed  => {e}') from e
-    
-if __name__ == '__main__':
-    df = load_data(DATA_PATH)
-    df = data_cleaning(df)
-    train, test = feature_engineering(df)
-    print(train.head(5))
-    print(test.head(5))
+
+## If you want to try the function isolated of the project, then
+## uncomment this snippet:
+
+# if __name__ == '__main__':
+#     df = load_data(DATA_PATH)
+#     df = data_cleaning(df)
+#     train, test = feature_engineering(df)
+#     print(train.head(5))
+#     print(test.head(5))
+
+# And run the script using the -m flag, treating the src folder as a package from backend:  
+# python -m src.components.feature_engineering

@@ -8,6 +8,7 @@ ipykernel
 notebook
 jupyter-client
 jupyter-core
+mlflow
 scikit-learn
 xgboost
 pydantic
