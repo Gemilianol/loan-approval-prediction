@@ -3,7 +3,7 @@ scipy #Need it for sklearn
 pandas
 matplotlib
 seaborn
-pip
+#pip
 ipykernel
 notebook
 jupyter-client

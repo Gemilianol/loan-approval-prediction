@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from src.config import DATA_PATH, DATA_SOURCES
+from src.config import DATA_PATH, MLFLOW_URI
 from src.components.data_ingestion import load_data
 from src.components.data_cleaning import data_cleaning
 from src.components.feature_engineering import feature_engineering
@@ -44,6 +44,9 @@ def log_reg_train(train: pd.DataFrame, test: pd.DataFrame) -> ClassifierMixin:
 
             # Log parameters
             #mlflow.log_params(params)
+            
+            #
+            mlflow.set_tracking_uri(MLFLOW_URI)
 
             # Train model
             model = LogisticRegression(random_state=0)
@@ -73,15 +76,21 @@ def log_reg_train(train: pd.DataFrame, test: pd.DataFrame) -> ClassifierMixin:
             # Infer model signature
             signature = infer_signature(X_train, model.predict(X_train))
 
-            # Log the model
-            mlflow.sklearn.log_model(
+            ## Log and register model in one step
+            model_info=mlflow.sklearn.log_model(
                 sk_model=model,
                 name="model",
                 signature=signature,
+                registered_model_name="LoanPredictionModel",
                 input_example=X_train[:5],  # Sample input for documentation
             )
+            
+            # Set a tag that we can use to remind ourselves what this model was for
+            mlflow.set_logged_model_tags(
+            model_info.model_id, {"Training Info": "Basic LR model for Loan Prediction Data"}
+            )
         
-        return model
+        return model_info
         
     # Here I want to catch any exception so:
     except Exception as e:
@@ -92,22 +101,27 @@ def log_reg_train(train: pd.DataFrame, test: pd.DataFrame) -> ClassifierMixin:
 ## If you want to try the function isolated of the project, then
 ## uncomment this snippet:
 
-if __name__ == '__main__':
-    df = load_data(DATA_PATH)
-    df = data_cleaning(df)
-    train, test = feature_engineering(df)
-    model = log_reg_train(train, test)
-    # Should be in a 2D array format
-    # pd.DataFrame({'feature1': [10], 'feature2': [20]})
-    # Or np.array([[10, 20]])
-    pred = model.predict(pd.DataFrame({
-        'income': [0.8381808251212738], 
-        'credit_score': [1.2919151379795572],
-        'loan_amount': [1.082574354413527], 
-        'years_employed': [1.5351379413785595],
-        'points': [1.229885468202287]
-    }))
-    print(pred)
+# if __name__ == '__main__':
+#     df = load_data(DATA_PATH)
+#     df = data_cleaning(df)
+#     train, test = feature_engineering(df)
+    
+#     model_info = log_reg_train(train, test)
+    
+#     loaded_model = mlflow.pyfunc.load_model(model_info.model_uri)
+    
+#     # Should be in a 2D array format
+#     # pd.DataFrame({'feature1': [10], 'feature2': [20]})
+#     # Or np.array([[10, 20]])
+#     pred = loaded_model.predict(pd.DataFrame({
+#         'income': [0.8381808251212738], 
+#         'credit_score': [1.2919151379795572],
+#         'loan_amount': [1.082574354413527], 
+#         'years_employed': [1.5351379413785595],
+#         'points': [1.229885468202287]
+#     }))
+    
+#     print(pred)
 
 # And run the script using the -m flag, treating the src folder as a package from backend:  
 # python -m src.components.model_training
