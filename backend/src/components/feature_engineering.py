@@ -9,17 +9,21 @@ from src.components.data_cleaning import data_cleaning
 from src.utils.logger import logger
 
 def feature_engineering(data: pd.DataFrame) -> pd.DataFrame:
-    """_summary_
-
+    """
+    This function is in charge or apply transformations over the features 
+    and also does the train test split accordly.
+    
+    HINT: You can also use isolated functions for Train/Test Split,
+    StandardScaler and OneHotEncoder. As a result, some lines of code will repeated.
+    In this case, for simplicity, I collapse everything here.
+    
     Args:
-        data (pd.DataFrame): _description_
+        data (pd.DataFrame): Get the dataset from the preview step (data_cleaning).
 
     Returns:
-        pd.DataFrame: _description_
+        pd.DataFrame: Train + Test dataframes with the transformations needed.
     """
     try:
-        data = data.drop(columns=DATA_SOURCES['COLS_TO_DROP'])
-        
         X = data.drop(columns=DATA_SOURCES['TARGET'])
         y = data[DATA_SOURCES['TARGET']]
         # data['loan_approved'] returns pandas.core.series.Series
@@ -58,7 +62,7 @@ def feature_engineering(data: pd.DataFrame) -> pd.DataFrame:
     
     # Here I want to catch any exception so:
     except Exception as e:
-        logger.debug('Error cleaning the Dataset passed =>%s', e)
+        logger.debug('Error cleaning the Dataset passed => %s', e)
         raise RuntimeError(f'Error cleaning the Dataset passed  => {e}') from e
 
 ## If you want to try the function isolated of the project, then

@@ -6,7 +6,9 @@ DATA_PATH = 'data/raw_data.csv'
 
 MLFLOW_URI = 'http://127.0.0.1:5000'
 
-MODEL_PATH = ""
+MODEL_PATH = ''
+
+MODEL_URI = 'models:/m-94e795f567e446f39c43e19a30a34785'
 
 DATA_SOURCES = {
     'COLS_TO_DROP': ['name','city'],

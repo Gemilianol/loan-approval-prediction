@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from src.config import DATA_PATH, MLFLOW_URI
+from src.config import DATA_PATH, MODEL_URI
 from src.components.data_ingestion import load_data
 from src.components.data_cleaning import data_cleaning
 from src.components.feature_engineering import feature_engineering
@@ -19,9 +19,24 @@ from mlflow.models import infer_signature
 from src.utils.logger import logger
 
 
-def load_mlflow_model(model_info, data) -> np.array:
+def load_mlflow_model(model_uri: str, data: pd.DataFrame) -> np.array:
+    """ 
+    This function will load the model from MLFLow and then predict the input data
+    with that model. 
+
+    Args:
+        model_uri (str): Hardcoded model URI from config file
+        data (pd.DataFrame): input data
+
+    Raises:
+        RuntimeError: Error with input data
+        RuntimeError: Error with prediction
+
+    Returns:
+        np.array: Prediction
+    """
     try:
-        loaded_model = mlflow.pyfunc.load_model(model_info.model_uri)
+        loaded_model = mlflow.pyfunc.load_model(model_uri)
     except Exception as e:
         logger.debug('Error loading the model from MLFlow =>%s', e)
         raise RuntimeError(f'Error loading the model from MLFlow => {e}') from e
@@ -36,11 +51,6 @@ def load_mlflow_model(model_info, data) -> np.array:
 ## uncomment this snippet:
 
 if __name__ == '__main__':
-    df = load_data(DATA_PATH)
-    df = data_cleaning(df)
-    train, test = feature_engineering(df)
-    
-    model_info = log_reg_train(train, test)
     
     # Should be in a 2D array format
     # pd.DataFrame({'feature1': [10], 'feature2': [20]})
@@ -53,7 +63,7 @@ if __name__ == '__main__':
         'points': [1.229885468202287]
     })
     
-    pred = load_mlflow_model(model_info, data)
+    pred = load_mlflow_model(MODEL_URI, data)
     
     print(pred)
 

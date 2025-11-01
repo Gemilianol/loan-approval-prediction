@@ -10,58 +10,68 @@ import mlflow.sklearn
 from sklearn.linear_model import LogisticRegression
 # Base class that all estimators inherit from in scikit-learn
 # For a Classifier: **ClassifierMixin** 
-# For a Regressor:**RegressorMixin** 
+# For a Regressor: **RegressorMixin** 
 # Any generic Estimator: **BaseEstimator**
 from sklearn.base import ClassifierMixin
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from mlflow.models import infer_signature
+#from mlflow import MlflowClient
 from src.utils.logger import logger
 
 def log_reg_train(train: pd.DataFrame, test: pd.DataFrame) -> ClassifierMixin:
-    """_summary_
+    """
+    This function will be keep X and Y separately and then will run MLFlow
+    experiment in order to train a Logistic Regression model. 
 
     Args:
-        train (pd.DataFrame): _description_
-        test (pd.DataFrame): _description_
+        train (pd.DataFrame): The entire train dataset.
+        test (pd.DataFrame): The entire test dataset.
 
     Raises:
-        RuntimeError: _description_
+        RuntimeError: Safeguard if something happens.
 
     Returns:
-        ClassifierMixin: _description_
+        ClassifierMixin: The trained Logistic Regression model URI. 
     """
     try:
         X_train, X_test = train.drop(columns=['loan_approved']), test.drop(columns=['loan_approved']) 
         y_train, y_test = train['loan_approved'], test['loan_approved']
     except Exception as e:
-        logger.debug('Error handling the data passed =>%s', e)
+        logger.debug('Error handling the data passed => %s', e)
         raise RuntimeError(f'Error handling the data passed => {e}') from e
     try:
         # Manual logging approach
         with mlflow.start_run():
             # Define hyperparameters
-            # params = {"C": 1.0, "max_iter": 1000, "solver": "lbfgs", "random_state": 42}
+            # params = {"C": 1.0, "max_iter": 1000, 
+            # "solver": "lbfgs", "random_state": 42}
 
             # Log parameters
             #mlflow.log_params(params)
             
-            #
-            mlflow.set_tracking_uri(MLFLOW_URI)
-
-            # Train model
+            # # Set the MLFlow Server - Localhost (Default)
+            # mlflow.set_tracking_uri(MLFLOW_URI)
+            
+            # # Set the MLFlow Client
+            # MlflowClient(tracking_uri=MLFLOW_URI)
+            
+            # Train a model as usual:
             model = LogisticRegression(random_state=0)
             model.fit(X_train, y_train)
 
             # Make predictions
             preds = model.predict(X_test)
             
-            accuracy = accuracy_score(y_test, preds) # Measures the proportion of correctly classified instances
+            # Measures the proportion of correctly classified instances
+            accuracy = accuracy_score(y_test, preds)
             print(f"Accuracy of Logistic Regression: {np.round(accuracy, 2)}")
             
-            f1 = f1_score(y_test, preds) # Harmonic mean of precision and recall
+            # Harmonic mean of precision and recall
+            f1 = f1_score(y_test, preds) 
             print(f"F1 Score of Logistic Regression: {np.round(f1,2)}")
             
-            roc_auc = roc_auc_score(y_test, preds) # Evaluates the performance of a binary classifier across various classification thresholds
+            # Evaluates the performance of a binary classifier across various classification thresholds
+            roc_auc = roc_auc_score(y_test, preds) 
             print(f"AUC of Logistic Regression: {np.round(roc_auc,2)}")
 
             # Calculate and log metrics
@@ -71,6 +81,7 @@ def log_reg_train(train: pd.DataFrame, test: pd.DataFrame) -> ClassifierMixin:
                 "roc_auc": roc_auc,  
             }
             
+            # Log the metris on MLFlow
             mlflow.log_metrics(metrics)
 
             # Infer model signature
@@ -89,14 +100,13 @@ def log_reg_train(train: pd.DataFrame, test: pd.DataFrame) -> ClassifierMixin:
             mlflow.set_logged_model_tags(
             model_info.model_id, {"Training Info": "Basic LR model for Loan Prediction Data"}
             )
-        
-        return model_info
+
+        return model_info.model_uri
         
     # Here I want to catch any exception so:
     except Exception as e:
         logger.debug('Error training the model over the Dataset passed =>%s', e)
         raise RuntimeError(f'Error training the model over the Dataset passed  => {e}') from e
-    
 
 ## If you want to try the function isolated of the project, then
 ## uncomment this snippet:
@@ -108,20 +118,8 @@ def log_reg_train(train: pd.DataFrame, test: pd.DataFrame) -> ClassifierMixin:
     
 #     model_info = log_reg_train(train, test)
     
-#     loaded_model = mlflow.pyfunc.load_model(model_info.model_uri)
-    
-#     # Should be in a 2D array format
-#     # pd.DataFrame({'feature1': [10], 'feature2': [20]})
-#     # Or np.array([[10, 20]])
-#     pred = loaded_model.predict(pd.DataFrame({
-#         'income': [0.8381808251212738], 
-#         'credit_score': [1.2919151379795572],
-#         'loan_amount': [1.082574354413527], 
-#         'years_employed': [1.5351379413785595],
-#         'points': [1.229885468202287]
-#     }))
-    
-#     print(pred)
+#     # I'll hold the model's URI at first on config.   
+#     print(model_info)
 
 # And run the script using the -m flag, treating the src folder as a package from backend:  
 # python -m src.components.model_training

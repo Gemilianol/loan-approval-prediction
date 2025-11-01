@@ -3,9 +3,15 @@ from src.config import DATA_PATH
 from src.utils.logger import logger
 from pydantic import validate_call
 
+# The validate_call() decorator in Pydantic, and similar 
+# argument validation mechanisms in other languages
+# and frameworks, primarily focus on 
+# validating the arguments passed to a function, not its return values
+
 @validate_call
 def load_data(file_path: str) -> pd.DataFrame:
-    """ A simple loader data function
+    """ 
+    A simple loader data function
 
     Args:
         file_path (str): which is located the data
@@ -23,7 +29,7 @@ def load_data(file_path: str) -> pd.DataFrame:
     
     # Here I want to catch any another exception so:
     except Exception as e:
-        logger.debug('Error loading the CSV file =>%s', e)
+        logger.debug('Error loading the CSV file => %s', e)
         raise RuntimeError(f'Error loading the CSV file => {e}') from e
 
 ## If you want to try the function isolated of the project, then
