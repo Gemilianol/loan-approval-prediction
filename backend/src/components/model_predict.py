@@ -19,27 +19,40 @@ from mlflow.models import infer_signature
 from src.utils.logger import logger
 
 
-def load_mlflow_model(model_uri: str, data: pd.DataFrame) -> np.array:
+def load_mlflow_model(model_uri: str):
     """ 
-    This function will load the model from MLFLow and then predict the input data
-    with that model. 
+    This function will load the model from MLFLow.
 
     Args:
-        model_uri (str): Hardcoded model URI from config file
+        model_uri (str): Hardcoded model URI from config file.
+
+    Raises:
+        RuntimeError: Error with model URI passed.
+
+    Returns:
+        MLFlow: MLFLOW Model
+    """
+    try:
+        loaded_model = mlflow.pyfunc.load_model(model_uri)
+        return loaded_model
+    except Exception as e:
+        logger.debug('Error loading the model from MLFlow =>%s', e)
+        raise RuntimeError(f'Error loading the model from MLFlow => {e}') from e
+    
+def predict_input(loaded_model, data: pd.DataFrame) -> np.ndarray:
+    """ 
+    This function will predict the input data with model loaded. 
+
+    Args:
+        loaded_model: Model loaded from MLFlow.
         data (pd.DataFrame): input data
 
     Raises:
-        RuntimeError: Error with input data
         RuntimeError: Error with prediction
 
     Returns:
         np.array: Prediction
     """
-    try:
-        loaded_model = mlflow.pyfunc.load_model(model_uri)
-    except Exception as e:
-        logger.debug('Error loading the model from MLFlow =>%s', e)
-        raise RuntimeError(f'Error loading the model from MLFlow => {e}') from e
     try:
         pred = loaded_model.predict(data)
         return pred
@@ -50,22 +63,22 @@ def load_mlflow_model(model_uri: str, data: pd.DataFrame) -> np.array:
 ## If you want to try the function isolated of the project, then
 ## uncomment this snippet:
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     
-    # Should be in a 2D array format
-    # pd.DataFrame({'feature1': [10], 'feature2': [20]})
-    # Or np.array([[10, 20]])
-    data = pd.DataFrame({
-        'income': [0.8381808251212738], 
-        'credit_score': [1.2919151379795572],
-        'loan_amount': [1.082574354413527], 
-        'years_employed': [1.5351379413785595],
-        'points': [1.229885468202287]
-    })
+#     # Should be in a 2D array format
+#     # pd.DataFrame({'feature1': [10], 'feature2': [20]})
+#     # Or np.array([[10, 20]])
+#     data = pd.DataFrame({
+#         'income': [0.8381808251212738], 
+#         'credit_score': [1.2919151379795572],
+#         'loan_amount': [1.082574354413527], 
+#         'years_employed': [1.5351379413785595],
+#         'points': [1.229885468202287]
+#     })
     
-    pred = load_mlflow_model(MODEL_URI, data)
+#     pred = load_mlflow_model(MODEL_URI, data)
     
-    print(pred)
+#     print(pred)
 
 # And run the script using the -m flag, treating the src folder as a package from backend:  
 # python -m src.components.model_predict
