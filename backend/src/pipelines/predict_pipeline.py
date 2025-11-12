@@ -8,7 +8,6 @@ from src.utils.logger import logger
 _MODEL = load_mlflow_model(MODEL_URI)
 # _MODEL = None
 
-
 def predict_pipeline(X: pd.DataFrame) -> np.ndarray:
     
     global _MODEL
@@ -31,15 +30,20 @@ def predict_pipeline(X: pd.DataFrame) -> np.ndarray:
 
 if __name__ == '__main__':
     
-    # Should be in a 2D array format
-    # pd.DataFrame({'feature1': [10], 'feature2': [20]})
-    # Or np.array([[10, 20]])
+    # data = pd.DataFrame({
+    #     'income': np.int64([157200]), 
+    #     'credit_score': np.int64([699]),
+    #     'loan_amount': np.int64([15985]), 
+    #     'years_employed': np.int64([10]),
+    #     'points': np.float64([59])
+    # })
+    
     data = pd.DataFrame({
-        'income': [0.8381808251212738], 
-        'credit_score': [1.2919151379795572],
-        'loan_amount': [1.082574354413527], 
-        'years_employed': [1.5351379413785595],
-        'points': [1.229885468202287]
+        'income': [187258], 
+        'credit_score': [123],
+        'loan_amount': [19598], 
+        'years_employed': [11],
+        'points': [229]
     })
     
     pred = predict_pipeline(data)
@@ -47,4 +51,4 @@ if __name__ == '__main__':
     print(pred)
 
 # And run the script using the -m flag, treating the src folder as a package from backend:  
-# python -m src.components.model_predict
+# python -m src.pipelines.predict_pipeline

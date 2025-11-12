@@ -12,4 +12,7 @@ mlflow
 scikit-learn
 xgboost
 pydantic
+flask
+flask_cors
+gunicorn
 

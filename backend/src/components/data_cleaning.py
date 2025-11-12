@@ -15,7 +15,7 @@ def data_cleaning(data: pd.DataFrame) -> pd.DataFrame:
         - Remove duplicates (if they exists)
 
     Args:
-        data: Original Dataset.
+        data (pd.DataFrame): Original Dataset.
     
     Returns:
         pd.DataFrame: Cleaned Dataset.
@@ -26,6 +26,7 @@ def data_cleaning(data: pd.DataFrame) -> pd.DataFrame:
         # and then continue with:
         data = data.dropna()
         data = data.drop_duplicates()
+        
         return data
     
     # Here I want to catch any exception so:

@@ -8,7 +8,7 @@ MLFLOW_URI = 'http://127.0.0.1:5000'
 
 MODEL_PATH = ''
 
-MODEL_URI = 'models:/m-94e795f567e446f39c43e19a30a34785'
+MODEL_URI = 'models:/m-8dfd37442f61499ba922a8a93dace4fd'
 
 DATA_SOURCES = {
     'COLS_TO_DROP': ['name','city'],
