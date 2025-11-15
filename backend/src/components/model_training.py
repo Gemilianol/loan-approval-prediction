@@ -164,19 +164,19 @@ def log_reg_train(X_train, X_test, y_train, y_test) -> ClassifierMixin:
 ## If you want to try the function isolated of the project, then
 ## uncomment this snippet:
 
-if __name__ == '__main__':
-    df = load_data(DATA_PATH)
-    df = data_cleaning(df)
-    print(df.head(5))
-    X_train, X_test, y_train, y_test = split_train_and_test(df)
-    X_train, X_test, y_train, y_test = feature_engineering(X_train, X_test, y_train, y_test)
+# if __name__ == '__main__':
+#     df = load_data(DATA_PATH)
+#     df = data_cleaning(df)
+#     print(df.head(5))
+#     X_train, X_test, y_train, y_test = split_train_and_test(df)
+#     X_train, X_test, y_train, y_test = feature_engineering(X_train, X_test, y_train, y_test)
     
-    print(X_train.dtypes)
+#     print(X_train.dtypes)
     
-    model_info = log_reg_train(X_train, X_test, y_train, y_test)
+#     model_info = log_reg_train(X_train, X_test, y_train, y_test)
     
-    # I'll hold the model's URI at first on config.   
-    print(model_info)
+#     # I'll hold the model's URI at first on config.   
+#     print(model_info)
 
 # And run the script using the -m flag, treating the src folder as a package from backend:  
 # python -m src.components.model_training

@@ -1,26 +1,15 @@
 import pandas as pd
 import numpy as np
-from src.components.model_predict import load_mlflow_model, predict_input
-from src.config import MODEL_URI
+from typing import Optional
+from sklearn.base import ClassifierMixin
+from src.components.model_predict import predict_input
 from src.utils.logger import logger
 
-# Cache the model loaded.
-_MODEL = load_mlflow_model(MODEL_URI)
-# _MODEL = None
-
-def predict_pipeline(X: pd.DataFrame) -> np.ndarray:
-    
-    global _MODEL
+def predict_pipeline( X: pd.DataFrame, model: Optional [ClassifierMixin] = None) -> np.ndarray:
     
     try:
-        if _MODEL is None:
-            print("Something happened. Trying to load the model again.")
-            model = load_mlflow_model(MODEL_URI)
-            pred = predict_input(model, X)
-            return pred
-        else:
-            pred = predict_input(_MODEL, X)
-            return pred
+        pred = predict_input(model, X)
+        return pred
     except Exception as e:
         logger.debug('Something happened through the prediction process => %s', e)
         raise RuntimeError(f'Something happened through the prediction process => {e}') from e

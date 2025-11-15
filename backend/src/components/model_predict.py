@@ -1,25 +1,17 @@
 import pandas as pd
 import numpy as np
+from typing import Optional
 from src.config import DATA_PATH, MODEL_URI
 from src.components.data_ingestion import load_data
 from src.components.data_cleaning import data_cleaning
-from src.components.feature_engineering import feature_engineering
-from src.components.model_training import log_reg_train
+from src.components.feature_engineering import split_train_and_test, feature_engineering
 import mlflow
 import mlflow.sklearn
-# For simplicity we start with a Logistic Regression
-from sklearn.linear_model import LogisticRegression
-# Base class that all estimators inherit from in scikit-learn
-# For a Classifier: **ClassifierMixin** 
-# For a Regressor:**RegressorMixin** 
-# Any generic Estimator: **BaseEstimator**
 from sklearn.base import ClassifierMixin
-from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
-from mlflow.models import infer_signature
 from src.utils.logger import logger
 
 
-def load_mlflow_model(model_uri: str):
+def load_mlflow_model(model_uri: str) -> ClassifierMixin:
     """ 
     This function will load the model from MLFLow.
 
@@ -30,53 +22,51 @@ def load_mlflow_model(model_uri: str):
         RuntimeError: Error with model URI passed.
 
     Returns:
-        MLFlow: MLFLOW Model
+        MLFlow: MLFLOW Model.
     """
     try:
         loaded_model = mlflow.pyfunc.load_model(model_uri)
         return loaded_model
     except Exception as e:
-        logger.debug('Error loading the model from MLFlow =>%s', e)
+        logger.debug('Error loading the model from MLFlow => %s', e)
         raise RuntimeError(f'Error loading the model from MLFlow => {e}') from e
     
-def predict_input(loaded_model, data: pd.DataFrame) -> np.ndarray:
+def predict_input( data: pd.DataFrame, model: Optional [ClassifierMixin] = None) -> np.ndarray | str:
     """ 
     This function will predict the input data with model loaded. 
 
     Args:
         loaded_model: Model loaded from MLFlow.
-        data (pd.DataFrame): input data
+        data (pd.DataFrame): input data.
 
     Raises:
-        RuntimeError: Error with prediction
+        RuntimeError: Error with prediction.
 
     Returns:
-        np.array: Prediction
+        np.array: Prediction.
     """
     try:
-        pred = loaded_model.predict(data)
-        return pred
+        pred = model.predict(data)
+        return ['✅ Loan Approved' if pred[0] == 1 else '❌ Loan Rejected'][0]
     except Exception as e:
-        logger.debug('Error handling the data passed =>%s', e)
-        raise RuntimeError(f'Error handling the data passed => {e}') from e
+        logger.debug('Error predicting the data passed =>%s', e)
+        raise RuntimeError(f'Error predicting the data passed => {e}') from e
     
 ## If you want to try the function isolated of the project, then
 ## uncomment this snippet:
 
 # if __name__ == '__main__':
-    
-#     # Should be in a 2D array format
-#     # pd.DataFrame({'feature1': [10], 'feature2': [20]})
-#     # Or np.array([[10, 20]])
 #     data = pd.DataFrame({
-#         'income': [0.8381808251212738], 
-#         'credit_score': [1.2919151379795572],
-#         'loan_amount': [1.082574354413527], 
-#         'years_employed': [1.5351379413785595],
-#         'points': [1.229885468202287]
+#         'income': [187258], 
+#         'credit_score': [123],
+#         'loan_amount': [19598], 
+#         'years_employed': [11],
+#         'points': [229]
 #     })
     
-#     pred = load_mlflow_model(MODEL_URI, data)
+#     model = load_mlflow_model(MODEL_URI)
+    
+#     pred = predict_input(model, data)
     
 #     print(pred)
 
