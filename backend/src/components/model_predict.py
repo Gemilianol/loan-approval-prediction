@@ -66,7 +66,7 @@ def predict_input( data: pd.DataFrame, model: Optional [ClassifierMixin] = None)
     
 #     model = load_mlflow_model(MODEL_URI)
     
-#     pred = predict_input(model, data)
+#     pred = predict_input(data, model)
     
 #     print(pred)
 

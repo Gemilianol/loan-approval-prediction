@@ -19,6 +19,15 @@ app = Flask(__name__)
 # to communicate each other.
 CORS(app)
 
+# # --- Essential CORS Configuration ---
+# # 1. Allow ALL origins for simplicity (good for initial local development)
+# # CORS(app)
+
+# # 2. **BEST PRACTICE for local development:** #    Only allow your specific React frontend origin
+# CORS(app, resources={r"/predict": {"origins": "http://localhost:5173"}}) 
+# # or for all routes:
+# # CORS(app, origins="http://localhost:5173")
+
 # Minimal logging + health endpoint for K8s
 logger.info("Starting app...")
 
@@ -39,7 +48,7 @@ def health():
     """
     return jsonify({'status': 'ok'}), 200
     
-app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['POST'])
 def predict():
     """
     Endpoint to predict the input data (X) received from the user through the Frontend.
@@ -50,23 +59,22 @@ def predict():
     
     global _MODEL
     
+    # Handle preflight request
+    # if request.method == 'OPTIONS':
+    #     return jsonify({'status': 'ok'}), 200
+    
     try:
         # Parses the JSON data sent from the frontend into a Python dictionary.
         data = request.get_json()
         # Safeguard
         if not data:
             return jsonify({'Error': 'No data received'}), 400
-        
-        data = pd.DataFrame(data)
-        #data = pd.DataFrame([data], index=[0])
-        
-        # IMPORTANT: all input values which send from the frontend 
-        # are string by default:
-        # data = data.astype(float)
     
-        pred = predict_pipeline(_MODEL, data)
+        pred = predict_pipeline(data, _MODEL)
         
-        return jsonify({'Result': ['Approved' if pred[0]== 1 else 'Rejected']})
+        return jsonify({'Result': pred})
+        
+        # return jsonify({'Result': ['Approved' if pred[0]== 1 else 'Rejected']})
     
     except Exception as e:
         logger.debug('Something happened through the prediction process => %s', e)
