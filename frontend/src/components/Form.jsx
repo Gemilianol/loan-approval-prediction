@@ -1,13 +1,17 @@
+'use client';
 import React, { useState } from 'react';
 import { Form } from '@base-ui-components/react/form';
 import { Field } from '@base-ui-components/react/field';
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
 import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import styles from './index.module.css';
+import Typography from '@mui/material/Typography';
 
 function DefaultForm() {
   
-  // Data Fields (Min data values as default)
+  // Data Fields (Min data values as default Integers)
   const [data, setData] = useState({
     'income': 30050, 
     'credit_score': 300, 
@@ -107,94 +111,105 @@ function DefaultForm() {
   const [result, setResult] = useState(false);
 
   return (
-    <Form
-      className="Form"
-    errors={errors}
+    <Form 
+    className={styles.Form} 
+    errors={errors} 
     onSubmit={handleSubmit}
     >
 
-      <Field.Root name="income" className="Field">
-        <Field.Label className="Label">Anual Income (USD)</Field.Label>
+      <Field.Root name="income" className={styles.Field}>
+        <Field.Label className={styles.Label}>Anual Income (USD)</Field.Label>
         <Field.Control
           type="number"
           required
           // If you want to force always get values the backend:
           defaultValue={data.income}
           placeholder={data.income}
-          className="Input" 
+          className={styles.Input} 
           onChange={handleChange}
         />
-        <Field.Error className="Error"/>
-        <Field.Description className="Description">Your Current Anual Income in USD</Field.Description>
+        <Field.Error className={styles.Error}/>
+        <Field.Description className={styles.Description}>Your Current Anual Income in USD</Field.Description>
       </Field.Root>
 
-      <Field.Root name="credit_score" className="Field">
-        <Field.Label className="Label">Credit Score</Field.Label>
+      <Field.Root name="credit_score" className={styles.Field}>
+        <Field.Label className={styles.Label}>Credit Score</Field.Label>
         <Field.Control
           type="number"
           required
           defaultValue= {data.credit_score}
           placeholder={data.credit_score}
-          className="Input" 
+          className={styles.Input}
           onChange={handleChange}
         />
-        <Field.Error className="Error" />
-        <Field.Description className="Description">Your Current Credit Score</Field.Description>
+        <Field.Error className={styles.Error}/>
+        <Field.Description className={styles.Description}>Your Current Credit Score</Field.Description>
       </Field.Root>
 
-      <Field.Root name="loan_amount" className="Field">
-        <Field.Label className="Label">Loan Amount (USD)</Field.Label>
+      <Field.Root name="loan_amount" className={styles.Field}>
+        <Field.Label className={styles.Label}>Loan Amount (USD)</Field.Label>
         <Field.Control
           type="number"
           required
           defaultValue={data.loan_amount}
           placeholder={data.loan_amount}
-          className="Input" 
+          className={styles.Input}
           onChange={handleChange}
         />
-        <Field.Error className="Error" />
-        <Field.Description className="Description">The Loan Amount in USD</Field.Description>
+        <Field.Error className={styles.Error}/>
+        <Field.Description className={styles.Description}>The Loan Amount in USD</Field.Description>
       </Field.Root>
 
-      <Field.Root name="years_employed" className="Field">
-        <Field.Label className="Label">Years Employed</Field.Label>
+      <Field.Root name="years_employed" className={styles.Field}>
+        <Field.Label className={styles.Label}>Years Employed</Field.Label>
         <Field.Control
           type="number"
           required
           defaultValue={data.years_employed}
           placeholder={data.years_employed}
-          className="Input" 
+          className={styles.Input}
           onChange={handleChange}
         />
-        <Field.Error className="Error"/>
-        <Field.Description className="Description">Years Employed in Your Actual Job</Field.Description>
+        <Field.Error className={styles.Error}/>
+        <Field.Description className={styles.Description}>Years Employed in Your Actual Job</Field.Description>
       </Field.Root>
 
-      <Field.Root name="points" className="Field">
-        <Field.Label className="Label">Points</Field.Label>
+      <Field.Root name="points" className={styles.Field}>
+        <Field.Label className={styles.Label}>Points</Field.Label>
         <Field.Control
           type="number"
           required
           defaultValue={data.points}
           placeholder={data.points}
-          className="Input" 
+          className={styles.Input}
           onChange={handleChange}
         />
-        <Field.Error className="Error"/>
-        <Field.Description className="Description">Points</Field.Description>
+        <Field.Error className={styles.Error}/>
+        <Field.Description className={styles.Description}>Points</Field.Description>
       </Field.Root>
 
       <Button type="submit" 
       disabled={loading} 
-      focusableWhenDisabled 
-      className="Button" 
+      autoFocus
+      className={styles.Button} 
       variant="contained" 
       endIcon={<SendIcon />}
       >
-        Simulate Credit Approval
+        <Typography 
+        align="left"
+        noWrap= "true"
+        variant='caption'>
+          {loading ? 'Submitting' : 'Simulate Credit Approval'}
+        </Typography>
+        
       </Button>
 
-      {result ? <Card CardContent={response}/> : <Card CardContent={errors}/>}
+      {/* Only render a Card component If you've already have a prediction OR an error  */}
+
+      {result && response.Result ? <Card className={styles.Card}>
+        <CardContent className={styles.CardContent}>{response.Result}</CardContent></Card> : null}
+
+      {result && errors.value ? <Card className={styles.Card}><CardContent className={styles.CardContent}>{errors.value}</CardContent></Card> : null}
 
     </Form>
   );

@@ -4,10 +4,9 @@ from flask_cors import CORS
 import pandas as pd
 import numpy as np
 import json
-from src.components.model_predict import load_mlflow_model
+from src.components.model_predict import search_model_uri, load_mlflow_model
 from src.pipelines.training_pipeline import train_model_pipeline
 from src.pipelines.predict_pipeline import predict_pipeline
-from src.config import MODEL_URI
 from src.utils.logger import logger
 
 # Create a Flask application instance
@@ -32,11 +31,13 @@ CORS(app)
 logger.info("Starting app...")
 
 # Cache the model loaded.
+MODEL_URI = search_model_uri()
 _MODEL = load_mlflow_model(MODEL_URI)
 
 if _MODEL is None:
-    model_uri = train_model_pipeline(force_retrain=True)
-    _MODEL = load_mlflow_model(model_uri)  
+    train_model_pipeline(force_retrain=True)
+    MODEL_URI = search_model_uri()
+    _MODEL = load_mlflow_model(MODEL_URI)
 
 @app.route('/health', methods=['GET'])
 def health():

@@ -70,6 +70,8 @@ def feature_engineering(X_train: pd.DataFrame,
     Since we will integrate MLFlow on the project, in general all the steps
     over the 'X' merges on one Pipeline object (SKlearn).
     
+    Here I only will do the one hot encoding for the target.
+    
     For this reason, I will leave commented a local version of it as an example
     and only will do the transformation needed over 'y'. 
     

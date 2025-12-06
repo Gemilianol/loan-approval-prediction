@@ -6,14 +6,15 @@ from src.components.data_ingestion import load_data
 from src.components.data_cleaning import data_cleaning
 from src.components.feature_engineering import split_train_and_test, feature_engineering
 from src.components.model_training import log_reg_train
-from src.config import DATA_PATH, MODEL_URI
+from src.components.model_predict import search_model_uri
+from src.config import DATA_PATH
 from src.utils.logger import logger
 
 
 def train_model_pipeline(force_retrain: Optional [bool] = False) -> str:
     """
-    This function will be train a Logistic Regression from scratch if no
-    model trained is present or if you force the retrain manually.
+    This function will be train a Logistic Regression from scratch if 
+    you force the retrain manually.
 
     Args:
         force_retrain (bool, optional): Defaults to False.
@@ -22,24 +23,24 @@ def train_model_pipeline(force_retrain: Optional [bool] = False) -> str:
         RuntimeError: Safeguard if something happen.
 
     Returns:
-        str: New model URI to add on config file.
+        
     """
     try:
         # First, I need to check if I've already had a trained model or
         # I'm forcing manually to retrain the model. So:
-        if MODEL_URI == '' or force_retrain:
+        if force_retrain:
             
             df = load_data(DATA_PATH)
             df = data_cleaning(df)
             X_train, X_test, y_train, y_test = split_train_and_test(df)
             X_train, X_test, y_train, y_test = feature_engineering(X_train, X_test, y_train, y_test)
             
-            model_info = log_reg_train(X_train, X_test, y_train, y_test)
+            log_reg_train(X_train, X_test, y_train, y_test)
             
-            return model_info
+            return
         
         else:
-            print(f"You've already had a model. Model URI: {MODEL_URI}")
+            print(f"🥇 You've already had a best model. Model URI: {search_model_uri()}")
             print("If you want to retrain manually, please run the script with '--force ratrain' instead.")
     
     except Exception as e:

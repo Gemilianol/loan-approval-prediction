@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from src.config import DATA_PATH, MLFLOW_URI, DATA_SOURCES
+from src.config import DATA_PATH, DATA_SOURCES, MLFLOW_TRACKING_URI
 from src.components.data_ingestion import load_data
 from src.components.data_cleaning import data_cleaning
 from src.components.feature_engineering import split_train_and_test, feature_engineering
@@ -18,11 +18,11 @@ from sklearn.linear_model import LogisticRegression
 # For a Classifier: **ClassifierMixin** 
 # For a Regressor: **RegressorMixin** 
 # Any generic Estimator: **BaseEstimator**
-from sklearn.base import ClassifierMixin
+# from sklearn.base import ClassifierMixin
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from src.utils.logger import logger
 
-def log_reg_train(X_train, X_test, y_train, y_test) -> ClassifierMixin:
+def log_reg_train(X_train, X_test, y_train, y_test) -> str:
     """
     This function will run an MLFlow experiment in order to train a Logistic Regression model
     and then promote the model to production.
@@ -37,7 +37,7 @@ def log_reg_train(X_train, X_test, y_train, y_test) -> ClassifierMixin:
         RuntimeError: Safeguard if something happens.
 
     Returns:
-        ClassifierMixin: The trained Logistic Regression model URI (MLFlow). 
+        str: The trained Logistic Regression model URI (MLFlow). 
     """
     try:
         # Manual logging approach (Example from MLFlow)
@@ -52,10 +52,10 @@ def log_reg_train(X_train, X_test, y_train, y_test) -> ClassifierMixin:
             #mlflow.log_params(params)
             
             # # Set the MLFlow Server - Localhost (Default)
-            # mlflow.set_tracking_uri(MLFLOW_URI)
+            # mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
             
             # # Set the MLFlow Client
-            # MlflowClient(tracking_uri=MLFLOW_URI)
+            # MlflowClient(tracking_uri=MLFLOW_TRACKING_URI)
             
             ## ---------------- And then you can: ---------------- ##
             
@@ -68,6 +68,7 @@ def log_reg_train(X_train, X_test, y_train, y_test) -> ClassifierMixin:
             
             ## ----------------------- OR: ----------------------- ##
             
+            # Use a Pipeline Sklearn object instead:
             model = Pipeline(
                 steps=[("scaler", StandardScaler()), 
                        ("classifier", LogisticRegression())]
@@ -101,7 +102,7 @@ def log_reg_train(X_train, X_test, y_train, y_test) -> ClassifierMixin:
             # Log the metris on MLFlow
             mlflow.log_metrics(metrics)
             
-            ## --- More complex scenarios (Pipelines), you can use: --- ##
+            ## ------- For more complex scenarios (Pipelines), you can use: ------- ##
             
             # numeric_features = DATA_SOURCES['X_NUM_COLS']
             # numeric_transformer = Pipeline(
@@ -153,8 +154,20 @@ def log_reg_train(X_train, X_test, y_train, y_test) -> ClassifierMixin:
             # OPTIONAL:
             # mlflow.sklearn.save_model(model, f"../../models/Logistic_Regression_{model.model_id}")
             # print("Model saved locally at backend/models")
+            
+            # Handling timeout when uploading/downloading large artifacts
+            # When uploading or downloading large artifacts through the tracking server with the artifact 
+            # proxy enabled, the server may take a long time to process the request. 
+            # If it exceeds the timeout limit, the server will terminate the request, resulting in a request 
+            # failure on the client side.
+            
+            # To mitigate this issue, the timeout length can be increased by using the --uvicorn-opts option 
+            # when starting the server as shown below:
+            
+            # mlflow server --uvicorn-opts "--timeout-keep-alive=120" OR mlflow server --gunicorn-opts "--timeout=120"
 
-        return model.model_uri
+        logger.info('🤖 The model has been trained successfully! Model URI: %s', model.model_uri)
+        return f"🤖 The model has been trained successfully! Model URI: {model.model_uri}"
         
     # Here I want to catch any exception so:
     except Exception as e:
@@ -173,10 +186,7 @@ def log_reg_train(X_train, X_test, y_train, y_test) -> ClassifierMixin:
     
 #     print(X_train.dtypes)
     
-#     model_info = log_reg_train(X_train, X_test, y_train, y_test)
-    
-#     # I'll hold the model's URI at first on config.   
-#     print(model_info)
+#     log_reg_train(X_train, X_test, y_train, y_test)
 
 # And run the script using the -m flag, treating the src folder as a package from backend:  
 # python -m src.components.model_training

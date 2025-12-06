@@ -2,11 +2,10 @@ import pandas as pd
 import numpy as np
 from typing import Optional
 from sklearn.base import ClassifierMixin
-from src.config import MODEL_URI
-from src.components.model_predict import load_mlflow_model, predict_input
+from src.components.model_predict import search_model_uri, load_mlflow_model, predict_input
 from src.utils.logger import logger
 
-def predict_pipeline(X: pd.DataFrame, model: Optional [ClassifierMixin] = None) -> np.ndarray:
+def predict_pipeline(X: pd.DataFrame, model: ClassifierMixin) -> np.ndarray:
     
     try:
         pred = predict_input(X, model)
@@ -36,7 +35,8 @@ def predict_pipeline(X: pd.DataFrame, model: Optional [ClassifierMixin] = None) 
     #     'points': [29]
     # })
     
-    # model = load_mlflow_model(MODEL_URI)
+    # model_uri = search_model_uri()
+    # model = load_mlflow_model(model_uri)
     
     # pred = predict_pipeline(data, model)
     

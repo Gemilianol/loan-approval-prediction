@@ -1,94 +1,34 @@
-.Form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  max-width: 16rem;
-}
+/* theme.css from Material UI is the same of Global index.css */
+:root {
+  --color-blue: oklch(45% 50% 264deg);
+  --color-red: oklch(50% 55% 31deg);
 
-.Field {
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: 0.25rem;
-}
+  --color-gray-50: oklch(98% 0.25% 264deg);
+  --color-gray-100: oklch(12% 9.5% 264deg / 5%);
+  --color-gray-200: oklch(12% 9% 264deg / 7%);
+  --color-gray-300: oklch(12% 8.5% 264deg / 17%);
+  --color-gray-400: oklch(12% 8% 264deg / 38%);
+  --color-gray-500: oklch(12% 7.5% 264deg / 50%);
+  --color-gray-600: oklch(12% 7% 264deg / 67%);
+  --color-gray-700: oklch(12% 6% 264deg / 77%);
+  --color-gray-800: oklch(12% 5% 264deg / 85%);
+  --color-gray-900: oklch(12% 5% 264deg / 90%);
+  --color-gray-950: oklch(12% 5% 264deg / 95%);
 
-.Label {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  font-weight: 500;
-  color: var(--color-gray-900);
-}
+  @media (prefers-color-scheme: dark) {
+    --color-blue: oklch(69% 50% 264deg);
+    --color-red: oklch(80% 55% 31deg);
 
-.Input {
-  box-sizing: border-box;
-  padding-left: 0.875rem;
-  margin: 0;
-  border: 1px solid var(--color-gray-200);
-  width: 100%;
-  height: 2.5rem;
-  border-radius: 0.375rem;
-  font-family: inherit;
-  font-size: 1rem;
-  background-color: transparent;
-  color: var(--color-gray-900);
-
-  &:focus {
-    outline: 2px solid var(--color-blue);
-    outline-offset: -1px;
+    --color-gray-50: oklch(17% 0.25% 264deg);
+    --color-gray-100: oklch(28% 0.75% 264deg / 65%);
+    --color-gray-200: oklch(29% 0.75% 264deg / 80%);
+    --color-gray-300: oklch(35% 0.75% 264deg / 80%);
+    --color-gray-400: oklch(47% 0.875% 264deg / 80%);
+    --color-gray-500: oklch(64% 1% 264deg / 80%);
+    --color-gray-600: oklch(82% 1% 264deg / 80%);
+    --color-gray-700: oklch(92% 1.125% 264deg / 80%);
+    --color-gray-800: oklch(93% 0.875% 264deg / 85%);
+    --color-gray-900: oklch(95% 0.5% 264deg / 90%);
+    --color-gray-950: oklch(94% 0.375% 264deg / 95%);
   }
-}
-
-.Error {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  color: var(--color-red-800);
-}
-
-.Button {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 2.5rem;
-  padding: 0 0.875rem;
-  margin: 0;
-  outline: 0;
-  border: 1px solid var(--color-gray-200);
-  border-radius: 0.375rem;
-  background-color: var(--color-gray-50);
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1.5rem;
-  color: var(--color-gray-900);
-  user-select: none;
-
-  @media (hover: hover) {
-    &:hover:not([data-disabled]) {
-      background-color: var(--color-gray-100);
-    }
-  }
-
-  &:active:not([data-disabled]) {
-    background-color: var(--color-gray-200);
-    box-shadow: inset 0 1px 3px var(--color-gray-200);
-    border-top-color: var(--color-gray-300);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--color-blue);
-    outline-offset: -1px;
-  }
-
-  &[data-disabled] {
-    color: var(--color-gray-500);
-  }
-}
-
-.Description {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  color: var(--color-gray-600);
 }
