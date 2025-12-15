@@ -31,10 +31,12 @@ def search_model_uri() -> str:
     ],
         output_format='list' # Get results as a list instead of DataFrame
     )
-        Logged_Model = production_ready[0] # Returns LoggedModel object.
-        
+        if production_ready != []:
+            Logged_Model = production_ready[0].model_uri # Returns LoggedModel object.
+        else:
+            Logged_Model = ''
         # Then I need to catch the model URI to avoid hardcoded it. 
-        return str(Logged_Model.model_uri)
+        return str(Logged_Model)
     
     # ------- Model Comparison ------- #
     

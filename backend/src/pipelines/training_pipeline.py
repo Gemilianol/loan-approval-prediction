@@ -7,11 +7,11 @@ from src.components.data_cleaning import data_cleaning
 from src.components.feature_engineering import split_train_and_test, feature_engineering
 from src.components.model_training import log_reg_train
 from src.components.model_predict import search_model_uri
-from src.config import DATA_PATH
+from src.config import DATA_PATH, FAKE_DATA
 from src.utils.logger import logger
 
 
-def train_model_pipeline(force_retrain: Optional [bool] = False) -> str:
+def train_model_pipeline(force_retrain: Optional [bool] = True) -> str:
     """
     This function will be train a Logistic Regression from scratch if 
     you force the retrain manually.
@@ -28,9 +28,13 @@ def train_model_pipeline(force_retrain: Optional [bool] = False) -> str:
     try:
         # First, I need to check if I've already had a trained model or
         # I'm forcing manually to retrain the model. So:
-        if force_retrain:
+        if force_retrain or (search_model_uri() == ''):
             
-            df = load_data(DATA_PATH)
+            # HERE I've created (with some common sense) a fake data to simulate the real dataset:
+            df = pd.DataFrame(FAKE_DATA)
+            
+            # Use this for Production or an ETL pipeline instead:
+            # df = load_data(DATA_PATH)
             df = data_cleaning(df)
             X_train, X_test, y_train, y_test = split_train_and_test(df)
             X_train, X_test, y_train, y_test = feature_engineering(X_train, X_test, y_train, y_test)

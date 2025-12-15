@@ -1,0 +1,47 @@
+services:
+  mlflow:
+      container_name: mlflow
+      build:
+        context: ./backend/mlflow
+        dockerfile: Dockerfile
+      ports:
+        - '5000:5000' # (localhost:5000 → mlflow:5000)
+      # Vital: --host 0.0.0.0 allows connections from outside the container
+      command: mlflow server --host 0.0.0.0 --port 5000
+      restart: on-failure
+
+      # 1. ADD: Define the health check
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:5000"] # Command to check the endpoint
+        interval: 5s     # Check every 5 seconds
+        timeout: 10s     # Fail the check if no response after 10 seconds
+        retries: 10      # Retry up to 10 times (50 seconds total waiting time)
+
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '2000:2000' # (localhost:2000 → backend:2000)
+    environment:
+      - PYTHONUNBUFFERED=1
+      # Hint: Your backend code should connect to "http://mlflow:5000"
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    # depends_on only guarantees the order of creation not wait 
+    # for the application inside the container to be ready and listening.
+    depends_on:
+      mlflow:
+        condition: service_healthy # THIS guarantee that MLFlow is truly ready.
+    restart: on-failure
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '3000:80' # (localhost:3000 → nginx:80)
+    depends_on:
+      - backend
+    restart: unless-stopped
