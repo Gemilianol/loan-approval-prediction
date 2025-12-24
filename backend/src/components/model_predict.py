@@ -19,12 +19,25 @@ def search_model_uri() -> str:
     
     '''
     try:
-        # Basic search with pandas output (default)
+    #     # Basic search with pandas output (default) (Production Like)
+    #     production_ready = mlflow.search_logged_models(
+    #     experiment_ids=["0"],
+    #     filter_string="""
+    #         metrics.accuracy > 0.90
+    #         AND metrics.roc_auc > 0.80
+    #     """,
+    #     order_by=[
+    #     {"field_name": "metrics.accuracy", "ascending": False}  # Highest accuracy first
+    # ],
+    #     output_format='list' # Get results as a list instead of DataFrame
+    # )
+    
+    # Basic search with pandas output (default) (Example Like)
         production_ready = mlflow.search_logged_models(
         experiment_ids=["0"],
         filter_string="""
-            metrics.accuracy > 0.90
-            AND metrics.roc_auc > 0.80
+            metrics.accuracy > 0.20
+            AND metrics.roc_auc >= 0.50
         """,
         order_by=[
         {"field_name": "metrics.accuracy", "ascending": False}  # Highest accuracy first

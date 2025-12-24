@@ -7,11 +7,11 @@ from src.components.data_cleaning import data_cleaning
 from src.components.feature_engineering import split_train_and_test, feature_engineering
 from src.components.model_training import log_reg_train
 from src.components.model_predict import search_model_uri
-from src.config import DATA_PATH, FAKE_DATA
+from src.config import DATA_PATH, FAKE_DATA, DATA_SOURCES
 from src.utils.logger import logger
 
 
-def train_model_pipeline(force_retrain: Optional [bool] = True) -> str:
+def train_model_pipeline(force_retrain: Optional [bool] = False) -> str:
     """
     This function will be train a Logistic Regression from scratch if 
     you force the retrain manually.
@@ -32,6 +32,8 @@ def train_model_pipeline(force_retrain: Optional [bool] = True) -> str:
             
             # HERE I've created (with some common sense) a fake data to simulate the real dataset:
             df = pd.DataFrame(FAKE_DATA)
+            # To avoid MLFlow infer crash then:
+            df[DATA_SOURCES['X_NUM_COLS']] = df[DATA_SOURCES['X_NUM_COLS']].astype(np.float64)
             
             # Use this for Production or an ETL pipeline instead:
             # df = load_data(DATA_PATH)

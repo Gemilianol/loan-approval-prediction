@@ -3,16 +3,19 @@ scipy #Need it for sklearn
 pandas
 matplotlib
 seaborn
-#pip
+pip
 ipykernel
 notebook
 jupyter-client
 jupyter-core
-mlflow
+mlflow>=3.0.0
+# The image you are using (ghcr.io/mlflow/mlflow:v2.14.0) 
+# is version 2.14.0. Keeping them identical eliminates "weird" bugs.
+#If your client is version 2.8 or newer, but your MLflow tracking server is older 
+#the server will return a 404 error because it doesn't recognize the endpoint. 
 scikit-learn
 xgboost
 pydantic
 flask
 flask_cors
 gunicorn
-

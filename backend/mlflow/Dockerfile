@@ -1,5 +1,5 @@
 # Start from the official, known-good MLflow image
-FROM ghcr.io/mlflow/mlflow:v2.14.0
+FROM ghcr.io/mlflow/mlflow:v3.0.0
 
 # Since the official MLflow image is built on Debian, use apt
 USER root

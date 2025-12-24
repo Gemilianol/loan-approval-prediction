@@ -1,13 +1,30 @@
 services:
   mlflow:
       container_name: mlflow
+      # HERE you can pull the official image directly:
+      # image: ghcr.io/mlflow/mlflow:v2.14.0  # Pulls the official image
+      # OR build your custom image:
       build:
         context: ./backend/mlflow
         dockerfile: Dockerfile
       ports:
         - '5000:5000' # (localhost:5000 → mlflow:5000)
       # Vital: --host 0.0.0.0 allows connections from outside the container
-      command: mlflow server --host 0.0.0.0 --port 5000
+      # command: mlflow server --host 0.0.0.0 --port 5000
+      command: >
+        mlflow server 
+        --host 0.0.0.0 
+        --port 5000
+        --backend-store-uri sqlite:///mlflow.db 
+        --default-artifact-root ./mlruns
+
+      # The MLflow Model Registry and related APIs (including logged-models) 
+      # require a database-backed backend store (e.g., PostgreSQL, SQLite, MySQL). 
+      # They do not work with the default file-based backend store when running 
+      # the server locally or in a basic configuration. 
+
+      #  mlflow.exceptions.MlflowException: API request to endpoint /api/2.0/mlflow/logged-models failed with error code 404 != 200. Response body: '<!doctype html>
+
       restart: on-failure
 
       # 1. ADD: Define the health check
@@ -28,12 +45,24 @@ services:
       - PYTHONUNBUFFERED=1
       # Hint: Your backend code should connect to "http://mlflow:5000"
       - MLFLOW_TRACKING_URI=http://mlflow:5000
+      # Hint: for finding 'src' modules
+      - PYTHONPATH=/app
     # depends_on only guarantees the order of creation not wait 
     # for the application inside the container to be ready and listening.
     depends_on:
       mlflow:
         condition: service_healthy # THIS guarantee that MLFlow is truly ready.
     restart: on-failure
+    # THE COMBINED COMMAND
+    # 1. Train the model
+    # 2. IF successful (&&), start Gunicorn
+    command: >
+      sh -c "python -m src.pipelines.training_pipeline --force_retrain &&
+             gunicorn app:app -b 0.0.0.0:2000 --workers 2 --timeout 120"
+
+# YAML block scalar (>) to write a long command cleanly.
+# The && ensures that if training fails (e.g., bug in code), the server won't start
+# and sh -c to allow running multiple commands in a row.
 
   frontend:
     container_name: frontend

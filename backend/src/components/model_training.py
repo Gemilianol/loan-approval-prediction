@@ -139,6 +139,7 @@ def log_reg_train(X_train, X_test, y_train, y_test) -> str:
             ## Log and register model in one step
             model = mlflow.sklearn.log_model(
                 sk_model=model,
+                # artifact_path='model',
                 name="model",
                 signature=signature,
                 registered_model_name="LoanPredictionModel",
