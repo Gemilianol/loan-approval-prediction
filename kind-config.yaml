@@ -1,0 +1,19 @@
+# Since we need Ingress (ports 80/443), we cannot use the default cluster.
+kind: Cluster # not a pod or deployment.
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane # "Create a container that acts as the Master Node (Control Plane)."
+  kubeadmConfigPatches: # This section allows us to inject custom settings into the K8s startup process.
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+# If this label is missing, the Ingress Controller might not start correctly.
+  extraPortMappings:
+  - containerPort: 80
+    hostPort: 80 # localhost:80 → Kind-Node:80 (Ingress Controller)
+    protocol: TCP # Standard HTTP (unsecured).
+  - containerPort: 443
+    hostPort: 443 # localhost:443 → Kind-Node:443 (Ingress Controller)
+    protocol: TCP # Standard HTTPS (secured with SSL/TLS).

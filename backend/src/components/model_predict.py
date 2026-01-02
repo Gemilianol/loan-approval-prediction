@@ -19,7 +19,7 @@ def search_model_uri() -> str:
     
     '''
     try:
-    #     # Basic search with pandas output (default) (Production Like)
+    # Basic search with pandas output (default) (Production Like)
     #     production_ready = mlflow.search_logged_models(
     #     experiment_ids=["0"],
     #     filter_string="""
@@ -32,7 +32,7 @@ def search_model_uri() -> str:
     #     output_format='list' # Get results as a list instead of DataFrame
     # )
     
-    # Basic search with pandas output (default) (Example Like)
+    # Since the model example performs too bad, for the data from config.py (Example Like) use this instead:
         production_ready = mlflow.search_logged_models(
         experiment_ids=["0"],
         filter_string="""

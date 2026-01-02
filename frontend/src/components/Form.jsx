@@ -49,7 +49,15 @@ function DefaultForm() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:2000/predict', {
+      // For Local Development use this:
+
+      // const response = await fetch('http://localhost:2000/predict', {
+      //   method: 'POST',
+      //   headers: {'Content-Type': 'application/json'},
+      //   body: JSON.stringify(data)
+
+      // For Production like use this:
+      const response = await fetch('/api/predict', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)

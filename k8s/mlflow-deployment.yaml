@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow
+  template:
+    metadata:
+      labels:
+        app: mlflow
+    spec:
+      containers:
+      - name: mlflow
+        image: mlflow:custom  # <--- YOUR CUSTOM IMAGE 
+        # (tag from docker build -t mlflow:custom -f backend/mlflow/Dockerfile ./backend/mlflow)
+        # Using a local custom image in Kubernetes (specifically kind) The Cluster can't see your laptop's Docker images
+        # For this reason, build on premises and then load it on the Kind cluster node.
+        # If you want to avoid this, pull the default image from Dockerhub instead.
+        imagePullPolicy: IfNotPresent # <--- CRITICAL: Don't try to pull from Docker Hub
+        ports:
+        - containerPort: 5000
+        command: ["mlflow", "server"]
+        args: [
+          "--host", "0.0.0.0",
+          "--port", "5000",
+          "--backend-store-uri", "sqlite:////data/mlflow.db",
+          "--default-artifact-root", "/artifacts"
+        ]
+        # NOW WE USE THE CURL YOU INSTALLED
+        livenessProbe: # "Is this container dead/frozen?" Then K8s KILLS the container and starts a new one.
+          exec:
+            command:
+            - curl
+            - -f
+            - http://localhost:5000/health
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe: # "Are you ready to accept traffic?" K8s hides the container from the Service (LoadBalancer). No traffic gets sent there, but the container keeps running.
+          exec:
+            command:
+            - curl
+            - -f
+            - http://localhost:5000/health
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - name: db-volume
+          mountPath: /data
+        - name: artifacts-volume
+          mountPath: /artifacts
+      volumes:
+      - name: db-volume
+        persistentVolumeClaim:
+          claimName: mlflow-db-pvc
+      - name: artifacts-volume
+        persistentVolumeClaim:
+          claimName: mlflow-artifacts-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow-service
+spec:
+  selector:
+    app: mlflow
+  ports:
+  - protocol: TCP
+    port: 5000
+    targetPort: 5000

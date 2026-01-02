@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: model-training-job
+spec:
+  ttlSecondsAfterFinished: 100
+  backoffLimit: 2
+  template:
+    spec:
+      containers:
+      - name: trainer
+        image: backend:custom
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MLFLOW_TRACKING_URI
+          value: "http://mlflow-service:5000"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        command: ["python", "-m", "src.pipelines.training_pipeline", "--force_retrain"]
+        
+        # --- CRITICAL FIX START ---
+        volumeMounts:
+        - name: mlflow-storage
+          mountPath: /artifacts
+        # --- CRITICAL FIX END ---
+
+      initContainers:
+      - name: wait-for-mlflow
+        image: busybox:1.28
+        command: ['sh', '-c', "until nc -z mlflow-service 5000; do echo waiting for mlflow; sleep 2; done"]
+
+      # --- CRITICAL FIX START ---
+      volumes:
+      - name: mlflow-storage
+        persistentVolumeClaim:
+          claimName: mlflow-artifacts-pvc
+      # --- CRITICAL FIX END ---
+
+      restartPolicy: OnFailure

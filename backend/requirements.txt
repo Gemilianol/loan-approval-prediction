@@ -8,14 +8,14 @@ ipykernel
 notebook
 jupyter-client
 jupyter-core
-mlflow>=3.0.0
-# The image you are using (ghcr.io/mlflow/mlflow:v2.14.0) 
-# is version 2.14.0. Keeping them identical eliminates "weird" bugs.
-#If your client is version 2.8 or newer, but your MLflow tracking server is older 
-#the server will return a 404 error because it doesn't recognize the endpoint. 
+mlflow>=3.0.0 # (MLflow Client)
+# The image we are using (ghcr.io/mlflow/mlflow:v3.0.0)(MLflow tracking server)
+# is version 3.0.0. Keeping them identical eliminates "weird" bugs. Otherwise, 
+# the server will return a 404 error because it doesn't recognize the endpoint. 
 scikit-learn
 xgboost
 pydantic
 flask
 flask_cors
 gunicorn
+prometheus-client # In order to Python code be able to talk to Prometheus.
