@@ -1,10 +1,11 @@
-apiVersion: batch/v1
+apiVersion: batch/v1 # workload is finite
 kind: Job
 metadata:
   name: model-training-job
 spec:
-  ttlSecondsAfterFinished: 100
-  backoffLimit: 2
+  ttlSecondsAfterFinished: 100 # Keeps cluster clean / Prevents orphaned Jobs / Artifacts must already be persisted elsewhere (PVC, object storage)
+  backoffLimit: 2 # Max 2 retries if the Pod exits non-zero / After that → Job is marked Failed
+  # Everything under here is a PodSpec, identical in structure to a Deployment’s Pod template.
   template:
     spec:
       containers:
@@ -19,6 +20,8 @@ spec:
         command: ["python", "-m", "src.pipelines.training_pipeline", "--force_retrain"]
         
         # --- CRITICAL FIX START ---
+        # This is the bridge between ephemeral compute and durable state.
+        # Without this, trained models would disappear when the Pod exits.
         volumeMounts:
         - name: mlflow-storage
           mountPath: /artifacts
@@ -28,6 +31,7 @@ spec:
       - name: wait-for-mlflow
         image: busybox:1.28
         command: ['sh', '-c', "until nc -z mlflow-service 5000; do echo waiting for mlflow; sleep 2; done"]
+        # This checks network reachability, Not MLflow logical readiness
 
       # --- CRITICAL FIX START ---
       volumes:
@@ -35,5 +39,5 @@ spec:
         persistentVolumeClaim:
           claimName: mlflow-artifacts-pvc
       # --- CRITICAL FIX END ---
-
+      # This is mandatory for Jobs.
       restartPolicy: OnFailure

@@ -12,14 +12,14 @@ spec:
       labels:
         app: backend
     spec:
-      initContainers:
-      - name: wait-for-model
+      initContainers:         # Init containers are one-shot gates, not monitors.
+      - name: wait-for-model # Used for logs, events, debugging
         image: mlflow:custom
         imagePullPolicy: IfNotPresent
         command: 
           - "sh"
           - "-c"
-          - |
+          - |     # This is standard for short procedural logic.
             echo "Waiting for MLflow Service..."
             until curl -s -f http://mlflow-service:5000/health; do sleep 2; done
             echo "Checking for 'LoanPredictionModel'..."
@@ -28,20 +28,57 @@ spec:
               sleep 5
             done
             echo "Model found!"
-
+      # This is fail-fast by design.
       containers:
       - name: backend
         image: backend:custom
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 2000
+        - containerPort: 2000 # This is documentation + intent, It does NOT expose anything by itself. Services may reference it
         env:
         - name: MLFLOW_TRACKING_URI
-          value: "http://mlflow-service:5000"
+          value: "http://mlflow-service:5000" # Injected at container start / Immutable for the life of the container / Used by application code
         - name: PYTHONUNBUFFERED
           value: "1"
         command: ["gunicorn", "app:app", "-b", "0.0.0.0:2000", "--workers", "2", "--timeout", "120"]
+
+  # --- Dependencies belong in readiness, not liveness — and never via localhost unless they’re in the same container. --- #
+        # --- PROBES START ---
         
+        # 1. STARTUP PROBE (The "Heavy Lift" Guard)
+        # Standard web defaults (wait 10s) are deadly for ML apps.
+        # Startup Probe: Runs first. While it is running, Liveness and Readiness are disabled. 
+        # It gives the app a long time to start up. Once it succeeds once, it stops forever, and Liveness takes over.
+        # Allows 30 checks * 10 seconds = 300 seconds (5 minutes) for the model to load.
+        # If this fails, we assume the app is broken and restart it.
+        # Whether your model takes 2 seconds or 4 minutes to load, the startupProbe handles it without killing the pod.
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 2000
+          failureThreshold: 30
+          periodSeconds: 10
+
+        # 2. LIVENESS PROBE (The "Runtime" Guard)
+        # Only starts AFTER startupProbe succeeds.
+        # Now we can be strict: if it freezes for 45s (3*15), restart it.
+        livenessProbe:
+          tcpSocket:
+            port: 2000
+          periodSeconds: 15
+          failureThreshold: 3
+
+        # 3. READINESS PROBE (The "Traffic" Guard)
+        # Only starts AFTER startupProbe succeeds.
+        # Checks if we are ready to answer user requests.
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 2000
+          periodSeconds: 10
+          failureThreshold: 3
+        # --- PROBES END ---
+
         # --- CRITICAL FIX START ---
         volumeMounts:
         - name: mlflow-storage

@@ -18,6 +18,25 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80 # Assuming your frontend Dockerfile exposes Nginx on 80
+    # --- PROBES START ---
+        
+        # Liveness: "Are you frozen?"
+        # Logic: If Nginx stops answering on port 80, kill it.
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 5  # Give it 5s to boot
+          periodSeconds: 10       # Check every 10s
+
+        # Readiness: "Can users see the site?"
+        # Logic: If index.html isn't serve-able, don't send traffic.
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        # --- PROBES END ---
         
 ---
 apiVersion: v1

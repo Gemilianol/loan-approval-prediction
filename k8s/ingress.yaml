@@ -1,32 +1,38 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: networking.k8s.io/v1 # Kubernetes-native routing object
+kind: Ingress # It is consumed by an Ingress Controller (NGINX in your case)
 metadata:
   name: main-ingress # Renamed to generic "main-ingress"
-  annotations:
+  annotations: # controller-specific behavior
     # We still need the rewrite for the API, but only for the specific rule
     # REWRITE TARGET: This is critical.
     # It strips "/api" from the URL before sending it to the backend.
     # So "mlflow.local/api/predict" becomes "/predict" inside the container.
+    # Ingress routes based on external URLs, but your backend containers expect internal URLs.
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
   # ---------------------------
   # DOMAIN 1: The App (Users)
   # ---------------------------
+  # These rules apply only when the HTTP Host header matches loan-app.local.
+  # /etc/hosts or DNS is required.
   - host: loan-app.local
     http:
       paths:
       # 1. Frontend: Serves the UI
-      - path: /()(.*)
+      - path: /()(.*) # () → empty capture group (group 1) and (.*) → everything after / (group 2)
+      # Why the empty () exists? Because your rewrite rule uses $2.
+      # Group 1 → ignored - Group 2 → actual path
         pathType: ImplementationSpecific
         backend:
           service:
-            name: frontend-service
+            name: frontend-service # Ingress does not talk to Pods. It talks to Services.
             port:
               number: 80
       # 2. Backend Bridge: Allows the Frontend to call the API
       #    The Frontend code should call: "/api/predict"
-      - path: /api(/|$)(.*)
+      - path: /api(/|$)(.*) # Capture: Group 1 → / or end and Group 2 → the remaining path (api/whatever/...)
+      # Rewrite: /api/predict → $2 = predict → So backend receives: So backend receives:
         pathType: ImplementationSpecific
         backend:
           service:
@@ -47,3 +53,19 @@ spec:
             name: mlflow-service
             port:
               number: 5000
+
+# Full request flows (cementing the model)
+
+# Browser → loan-app.local/
+# Ingress → frontend-service:80
+# Pod → React app
+
+# Browser → loan-app.local/api/predict
+# Ingress → rewrite → /predict
+# Ingress → backend-service:2000
+# Pod → Flask/FastAPI
+
+# Browser → loan-app.local/api/predict
+# Ingress → rewrite → /predict
+# Ingress → backend-service:2000
+# Pod → Flask/FastAPI
